@@ -5,11 +5,11 @@ complexity information.
 
 ## Solution 1
 
-At a first glance, this seems like a simple problem, and there is a simple
+At first glance, this seems like a simple problem, and there *is* a simple
 solution. Using an array as an underlying data structure, the `#push` and `#pop`
 methods are easy to implement, and the `#increment` method just involves
-iterating over `n` elements in the array and incrementing their values by one
-each:
+iterating over `n` elements in the array and incrementing each of their values
+by one:
 
 ```rb
 class StackPlus
@@ -62,7 +62,7 @@ linear runtime. Can we do better?
 
 ## Solution 2
 
-Our goal with this improved solution is to improve the time complexity of the
+Our goal with this second solution is to improve the time complexity of the
 `#increment` method. That means that we need to find a way to increment each
 value in the stack _without_ iterating over every element in the array when the
 `#increment` method is called.
@@ -70,18 +70,21 @@ value in the stack _without_ iterating over every element in the array when the
 One very useful piece of information is that we only need to check the values of
 the array _when the `#pop` method is called_. So we don't need to increment each
 value in the `data` array when the `#increment` method is called, we just need a
-way to _keep track of all the `#increment` operations_, so that we can apply the
+way to _keep track of all the `#increment` operations_. We can then apply the
 correct incremented value when the `#pop` method is called.
 
-To do this, we'll make a second array `inc` that has the same number of elements
-as the `data` array, and this array will be used to keep track of all the
-`#increment` operations. The `inc` array will keep track of the number of
-elements that need to be incremented by storing that information at an index
-position that corresponds to the number of elements, and will encode the data
-about how many times the corresponding element from the `data` array needs to be
-incremented when the `#pop` method is called.
+To do this, we'll make a second array `inc` that will have the same number of
+elements as the `data` array. The `inc` array will keep track of the **number of
+elements that need to be incremented** by storing a value at the index position
+that corresponds to that number; the **value** stored will indicate the number
+of times those elements should be incremented. When the `#pop` method is called,
+the element will be incremented as indicated by the corresponding element in the
+`inc` array; in addition, if there are any remaining elements in the stack, the
+increment information will be passed down to the next element in the `inc` array
+so that those remaining elements also get incremented when they are popped off
+the stack.
 
-That is probably easier to visualize with some diagrams:
+The process is probably easier to visualize with some diagrams:
 
 ![Stack Plus Solution](https://curriculum-content.s3.amazonaws.com/phase-5/phase-5-practice-challenge-stack-plus/stack-plus-solution.png)
 
@@ -90,20 +93,19 @@ Before we start popping elements from the stack, our two arrays look like this:
 - `data`: `[2, 3, 5]`
 - `inc`: `[0, 1, 0]`
 
-From this, `inc` holds all the information that we need to know that the first
-two elements of the `data` array need to be incremented by 1 each when they are
-popped from the stack. Our algorithm needs to maintain that information as the
-stack is updated.
+The `inc` array above tells us that the first two elements of the `data` array
+each need to be incremented by 1 when they are popped from the stack.
 
-So after calling `#pop` once, we pop the top elements from _both_ the `data` and
-`inc` arrays and add them together to get 5. Then the arrays look like this:
+When `#pop` is called, we pop the top elements from _both_ the `data` and `inc`
+arrays, add them together to get 5, and return that value. Then the arrays look
+like this:
 
 - `data`: `[2, 3]`
 - `inc`: `[0, 1]`
 
-Calling `#pop` again, we pop `data` and `inc` and add them to get 4, and we also
-update the top of the `inc` array to keep track of the fact that we also need to
-increment the final value, 2:
+Calling `#pop` again, we pop `data` and `inc`, add them together to get 4, and
+return that value. But we **also** need to update the top of the `inc` array to
+keep track of the fact that the final value, 2, also needs to be incremented:
 
 - `data`: `[2]`
 - `inc`: `[1]`
@@ -173,8 +175,8 @@ We also have the following time complexity for each method:
 - `#increment`: O(1)
 
 As you can see, we were able to improve `#increment` to a constant time
-operation, since we don't need to iterate over each element in the array: we
-just need to look up one element in the `inc` array and update its value.
+operation, since we don't need to iterate over each element in the array.
+Instead, we just look up one element in the `inc` array and update its value.
 
 ## Solution 3
 
